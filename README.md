@@ -1,7 +1,7 @@
 # 🎓 EasyLens: Deep Learning Model Reviewer & Defense Documentation
 
 > **Assistive Vision System for the Visually Impaired through MobileNetV2 Deep Learning & Google ML Kit**  
-> *Holy Angel University – Department of Computer Science (4th Year Undergraduate Thesis)*
+> *Holy Angel University – School of Computing (4th Year Undergraduate Thesis)*
 
 ---
 
