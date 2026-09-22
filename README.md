@@ -35,11 +35,16 @@
 
 ## 🔄 4-Phase Fine-Tuning Strategy
 
-1. **Phase 1 (Warm-up & Base Freezing):** Frozen MobileNetV2 backbone, trained custom Dense head ($512 \rightarrow 256 \rightarrow 30$). Initial baseline reached ~83.47%.
+1. **Phase 1 (Warm-up & Base Freezing):** Frozen MobileNetV2 backbone (`trainable = False`), trained custom Dense head ($512 \rightarrow 256 \rightarrow 30$). Initial baseline reached ~83.47%.
 2. **Phase 2 (Mid-Level Unfreezing & Class Weight Mitigation):** Unfroze top 30 layers with `Adam(lr=1e-5)` and balanced class weights to force the model to learn rare minority objects.
 3. **Data Cleaning Intermission (24-Class Purge):** Removed unlearnable "ghost" classes ($\le 3$ images) and merged duplicate `person` casings to create a clean, statistically sound 24-class dataset.
 4. **Phase 3 (Deep Fine-Tuning):** Full unfreezing of all 155 layers with `Adam(lr=5e-6)`, achieving **85.47% accuracy**, **92.10% Top-2**, and **94.54% Top-3** accuracy.
 5. **Phase 4 (Micro-Optimization):** Delicate fine-tuning with `Adam(lr=1e-7)` down to `1e-8`, achieving final plateau convergence at **85.55% accuracy** and **86.63% precision**.
+
+### 🔬 Why Freeze and Progressively Unfreeze Layers?
+* **Preventing Gradient Shock & Catastrophic Forgetting (Phase 1):** The newly attached Dense classification head ($512 \rightarrow 256 \rightarrow 24$) begins with random weights. Training with an unfrozen backbone immediately would send massive, chaotic gradients backward through all 155 layers, destroying pre-trained ImageNet representations. Freezing the base protects foundational features while the head warms up.
+* **Hierarchical Feature Adaptation (Phase 2):** CNNs capture universal low-level primitives (edges, textures) in early layers and domain-specific semantic parts in upper layers. Unfreezing only the top 30 layers with a 50x lower learning rate ($1 \times 10^{-5}$) allows the high-level semantic filters to adapt to our assistive navigation classes without disturbing universal edge detectors.
+* **End-to-End Co-adaptation with Micro-Learning Rates (Phases 3 & 4):** Unfreezing all 155 layers under ultra-low learning rates ($5 \times 10^{-6}$ down to $1 \times 10^{-7}$) allows subtle holistic fine-tuning across the entire network to bridge the domain gap between generic ImageNet objects and assistive hazards (potholes, crosswalks, stairs) without destabilizing the model.
 
 ---
 
